@@ -112,6 +112,28 @@ proc `title=`*(window: Window, title: string) =
   var t = utf8to32(title)
   window.title_U32 = addr(t[0])
 
+proc newWindowBase*(mode: VideoMode, title: string, style: BitMaskU32 = WindowStyle.Default): WindowBase =
+  ## Construct a new window (with a UTF-8 title)
+  ##
+  ## This function creates the window with the size and pixel
+  ## depth defined in ``mode``. An optional style can be passed to
+  ## customize the look and behaviour of the window (borders,
+  ## title bar, resizable, closable, ...). If ``style`` contains
+  ## Fullscreen, then ``mode`` must be a valid video mode.
+  ##
+  ## The fourth parameter is a pointer to a structure specifying
+  ## advanced OpenGL context settings such as antialiasing,
+  ## depth-buffer bits, etc.
+  ##
+  ## *Arguments*:
+  ## - ``mode``: Video mode to use (defines the width, height and depth of the rendering area of the window)
+  ## - ``title``: Title of the window (normal UTF-8 string)
+  ## - ``style``: Window style
+  ##
+  ## *Returns:* A new Window object
+  var t = utf8to32(title)
+  newWindowBase_U32(mode, addr(t[0]), style)
+
 proc newWindow*(mode: VideoMode, title: string, style: BitMaskU32 = WindowStyle.Default,
                 settings = contextSettings()): Window =
   ## Construct a new window (with a UTF-8 title)
