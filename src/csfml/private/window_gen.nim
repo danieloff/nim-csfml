@@ -13,6 +13,8 @@ type Cursor* = ptr object
 
 type Window* = ptr object
 
+type WindowBase* = ptr object
+
 proc clipboard_getStr*(): cstring {.
   cdecl, importc: "sfClipboard_getString".}
   ## Get the content of the clipboard as string data (returns an ANSI string)
@@ -954,3 +956,313 @@ proc touch_getPosition*(finger: cint, relativeTo: Window): Vector2i {.
   ## - ``relativeTo``:  Reference window
   ## 
   ## *Returns:* Current position of ``finger``, or undefined if it's not down
+
+
+#--- SFML/Window/WindowBase ---#
+
+proc newWindowBaseC*(mode: VideoMode, title: cstring, style: BitMaskU32): WindowBase {.
+  cdecl, importc: "sfWindowBase_create".}
+  ## Construct a new window
+  ## 
+  ## This function creates the window with the size and pixel
+  ## depth defined in ``mode``. An optional style can be passed to
+  ## customize the look and behaviour of the window (borders,
+  ## title bar, resizable, closable, ...). If ``style`` contains
+  ## Fullscreen, then ``mode`` must be a valid video mode.
+  ## 
+  ## The fourth parameter is a pointer to a structure specifying
+  ## advanced OpenGL context settings such as antialiasing,
+  ## depth-buffer bits, etc.
+  ## 
+  ## *Arguments*:
+  ## - ``mode``:      Video mode to use (defines the width, height and depth of the rendering area of the window)
+  ## - ``title``:     Title of the window
+  ## - ``style``:     Window style
+  ## - ``settings``:  Additional settings for the underlying OpenGL context
+  ## 
+  ## *Returns:* A new Window object
+
+proc newWindowBase_U32(mode: VideoMode, title: StringU32, style: BitMaskU32): WindowBase {.
+  cdecl, importc: "sfWindowBase_createUnicode".}
+  ## Construct a new window (with a UTF-32 title)
+  ## 
+  ## This function creates the window with the size and pixel
+  ## depth defined in ``mode``. An optional style can be passed to
+  ## customize the look and behaviour of the window (borders,
+  ## title bar, resizable, closable, ...). If ``style`` contains
+  ## Fullscreen, then ``mode`` must be a valid video mode.
+  ## 
+  ## The fourth parameter is a pointer to a structure specifying
+  ## advanced OpenGL context settings such as antialiasing,
+  ## depth-buffer bits, etc.
+  ## 
+  ## *Arguments*:
+  ## - ``mode``:      Video mode to use (defines the width, height and depth of the rendering area of the window)
+  ## - ``title``:     Title of the window (UTF-32)
+  ## - ``style``:     Window style
+  ## - ``settings``:  Additional settings for the underlying OpenGL context
+  ## 
+  ## *Returns:* A new Window object
+
+proc destroy*(window: WindowBase) {.
+  cdecl, importc: "sfWindowBase_destroy".}
+  ## Destroy a window
+  ## 
+  ## *Arguments*:
+  ## - ``window``:  Window to destroy
+
+proc close*(window: WindowBase) {.
+  cdecl, importc: "sfWindowBase_close".}
+  ## Close a window and destroy all the attached resources
+  ## 
+  ## After calling this function, the Window object remains
+  ## valid, you must call WindowBase_destroy to actually delete it.
+  ## All other functions such as WindowBase_pollEvent or WindowBase_display
+  ## will still work (i.e. you don't have to test WindowBase_isOpen
+  ## every time), and will have no effect on closed windows.
+  ## 
+  ## *Arguments*:
+  ## - ``window``:  Window object
+
+proc open*(window: WindowBase): BoolInt {.
+  cdecl, importc: "sfWindowBase_isOpen".}
+  ## Tell whether or not a window is opened
+  ## 
+  ## This function returns whether or not the window exists.
+  ## Note that a hidden window (WindowBase_setVisible(False)) will return
+  ## True.
+  ## 
+  ## *Arguments*:
+  ## - ``window``:  Window object
+  ## 
+  ## *Returns:* True if the window is opened, False if it has been closed
+
+proc pollEvent*(window: WindowBase, event: var Event): BoolInt {.
+  cdecl, importc: "sfWindowBase_pollEvent".}
+  ## Pop the event on top of event queue, if any, and return it
+  ## 
+  ## This function is not blocking: if there's no pending event then
+  ## it will return false and leave ``event`` unmodified.
+  ## Note that more than one event may be present in the event queue,
+  ## thus you should always call this function in a loop
+  ## to make sure that you process every pending event.
+  ## 
+  ## *Arguments*:
+  ## - ``window``:  Window object
+  ## - ``event``:   Event to be returned
+  ## 
+  ## *Returns:* True if an event was returned, or False if the event queue was empty
+
+proc waitEvent*(window: WindowBase, event: var Event): BoolInt {.
+  cdecl, importc: "sfWindowBase_waitEvent".}
+  ## Wait for an event and return it
+  ## 
+  ## This function is blocking: if there's no pending event then
+  ## it will wait until an event is received.
+  ## After this function returns (and no error occured),
+  ## the ``event`` object is always valid and filled properly.
+  ## This function is typically used when you have a thread that
+  ## is dedicated to events handling: you want to make this thread
+  ## sleep as long as no new event is received.
+  ## 
+  ## *Arguments*:
+  ## - ``window``:  Window object
+  ## - ``event``:   Event to be returned
+  ## 
+  ## *Returns:* False if any error occured
+
+proc position*(window: WindowBase): Vector2i {.
+  cdecl, importc: "sfWindowBase_getPosition".}
+  ## Get the position of a window
+  ## 
+  ## *Arguments*:
+  ## - ``window``:  Window object
+  ## 
+  ## *Returns:* Position in pixels
+
+proc `position=`*(window: WindowBase, position: Vector2i) {.
+  cdecl, importc: "sfWindowBase_setPosition".}
+  ## Change the position of a window on screen
+  ## 
+  ## This function only works for top-level windows
+  ## (i.e. it will be ignored for windows created from
+  ## the handle of a child window/control).
+  ## 
+  ## *Arguments*:
+  ## - ``window``:    Window object
+  ## - ``position``:  New position of the window, in pixels
+
+proc size*(window: WindowBase): Vector2i {.
+  cdecl, importc: "sfWindowBase_getSize".}
+  ## Get the size of the rendering region of a window
+  ## 
+  ## The size doesn't include the titlebar and borders
+  ## of the window.
+  ## 
+  ## *Arguments*:
+  ## - ``window``:  Window object
+  ## 
+  ## *Returns:* Size in pixels
+
+proc `size=`*(window: WindowBase, size: Vector2i) {.
+  cdecl, importc: "sfWindowBase_setSize".}
+  ## Change the size of the rendering region of a window
+  ## 
+  ## *Arguments*:
+  ## - ``window``:  Window object
+  ## - ``size``:    New size, in pixels
+
+proc `titleC=`*(window: WindowBase, title: cstring) {.
+  cdecl, importc: "sfWindowBase_setTitle".}
+  ## Change the title of a window
+  ## 
+  ## *Arguments*:
+  ## - ``window``:  Window object
+  ## - ``title``:   New title
+
+proc `title_U32=`(window: WindowBase, title: StringU32) {.
+  cdecl, importc: "sfWindowBase_setUnicodeTitle".}
+  ## Change the title of a window (with a UTF-32 string)
+  ## 
+  ## *Arguments*:
+  ## - ``window``:  Window object
+  ## - ``title``:   New title
+
+proc setIcon*(window: WindowBase, width: cint, height: cint, pixels: ptr uint8) {.
+  cdecl, importc: "sfWindowBase_setIcon".}
+  ## Change a window's icon
+  ## 
+  ## ``pixels`` must be an array of ``width`` x ``height`` pixels
+  ## in 32-bits RGBA format.
+  ## 
+  ## *Arguments*:
+  ## - ``window``:  Window object
+  ## - ``width``:   Icon's width, in pixels
+  ## - ``height``:  Icon's height, in pixels
+  ## - ``pixels``:  Pointer to the array of pixels in memory
+
+proc `visible=`*(window: WindowBase, visible: BoolInt) {.
+  cdecl, importc: "sfWindowBase_setVisible".}
+  ## Show or hide a window
+  ## 
+  ## *Arguments*:
+  ## - ``window``:   Window object
+  ## - ``visible``:  True to show the window, False to hide it
+
+proc `mouseCursorVisible=`*(window: WindowBase, visible: BoolInt) {.
+  cdecl, importc: "sfWindowBase_setMouseCursorVisible".}
+  ## Show or hide the mouse cursor
+  ## 
+  ## *Arguments*:
+  ## - ``window``:   Window object
+  ## - ``visible``:  True to show, False to hide
+
+proc `mouseCursorGrabbed=`*(window: WindowBase, grabbed: BoolInt) {.
+  cdecl, importc: "sfWindowBase_setMouseCursorGrabbed".}
+  ## Grab or release the mouse cursor
+  ## 
+  ## If set, grabs the mouse cursor inside this window's client
+  ## area so it may no longer be moved outside its bounds.
+  ## Note that grabbing is only active while the window has
+  ## focus and calling this function for fullscreen windows
+  ## won't have any effect (fullscreen windows always grab the
+  ## cursor).
+  ## 
+  ## *Arguments*:
+  ## - ``grabbed``:  True to enable, False to disable
+
+proc `mouseCursor=`*(window: WindowBase, cursor: Cursor) {.
+  cdecl, importc: "sfWindowBase_setMouseCursor".}
+  ## Set the displayed cursor to a native system cursor
+  ## 
+  ## Upon window creation, the arrow cursor is used by default.
+  ## 
+  ## \warning The cursor must not be destroyed while in use by
+  ## the window.
+  ## 
+  ## \warning Features related to Cursor are not supported on
+  ## iOS and Android.
+  ## 
+  ## *Arguments*:
+  ## - ``window``:  Window object
+  ## - ``cursor``:  Native system cursor type to display
+  ## 
+  ## \see Cursor_createFromSystem
+  ## \see Cursor_createFromPixels
+
+proc `keyRepeatEnabled=`*(window: WindowBase, enabled: BoolInt) {.
+  cdecl, importc: "sfWindowBase_setKeyRepeatEnabled".}
+  ## Enable or disable automatic key-repeat
+  ## 
+  ## If key repeat is enabled, you will receive repeated
+  ## KeyPress events while keeping a key pressed. If it is disabled,
+  ## you will only get a single event when the key is pressed.
+  ## 
+  ## Key repeat is enabled by default.
+  ## 
+  ## *Arguments*:
+  ## - ``window``:   Window object
+  ## - ``enabled``:  True to enable, False to disable
+
+proc `joystickThreshold=`*(window: WindowBase, threshold: cfloat) {.
+  cdecl, importc: "sfWindowBase_setJoystickThreshold".}
+  ## Change the joystick threshold
+  ## 
+  ## The joystick threshold is the value below which
+  ## no JoyMoved event will be generated.
+  ## 
+  ## *Arguments*:
+  ## - ``window``:     Window object
+  ## - ``threshold``:  New threshold, in the range [0, 100]
+
+proc requestFocus*(window: WindowBase) {.
+  cdecl, importc: "sfWindowBase_requestFocus".}
+  ## Request the current window to be made the active
+  ## foreground window
+  ## 
+  ## At any given time, only one window may have the input focus
+  ## to receive input events such as keystrokes or mouse events.
+  ## If a window requests focus, it only hints to the operating
+  ## system, that it would like to be focused. The operating system
+  ## is free to deny the request.
+  ## This is not to be confused with WindowBase_setActive().
+
+proc hasFocus*(window: WindowBase): BoolInt {.
+  cdecl, importc: "sfWindowBase_hasFocus".}
+  ## Check whether the window has the input focus
+  ## 
+  ## At any given time, only one window may have the input focus
+  ## to receive input events such as keystrokes or most mouse
+  ## events.
+  ## 
+  ## *Returns:* True if window has focus, false otherwise
+
+proc systemHandle*(window: WindowBase): WindowHandle {.
+  cdecl, importc: "sfWindowBase_getSystemHandle".}
+  ## Get the OS-specific handle of the window
+  ## 
+  ## The type of the returned handle is WindowHandle,
+  ## which is a typedef to the handle type defined by the OS.
+  ## You shouldn't need to use this function, unless you have
+  ## very specific stuff to implement that SFML doesn't support,
+  ## or implement a temporary workaround until a bug is fixed.
+  ## 
+  ## *Arguments*:
+  ## - ``window``:  Window object
+  ## 
+  ## *Returns:* System handle of the window
+
+proc systemConnection*(window: WindowBase): pointer {.
+  cdecl, importc: "sfWindowBase_getSystemConnection".}
+  ## Get the OS-specific connection of the window
+  ## 
+  ## The type of the returned handle is WindowHandle,
+  ## which is a typedef to the handle type defined by the OS.
+  ## You shouldn't need to use this function, unless you have
+  ## very specific stuff to implement that SFML doesn't support,
+  ## or implement a temporary workaround until a bug is fixed.
+  ## 
+  ## *Arguments*:
+  ## - ``window``:  Window object
+  ## 
+  ## *Returns:* System connection of the window

@@ -23,7 +23,7 @@ import os.path
 import re
 
 
-inc_path = 'CSFML/include'
+inc_path = '../../CSFML/include'
 
 skip = 'Thread Mutex'.split()
 

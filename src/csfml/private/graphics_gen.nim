@@ -1852,8 +1852,9 @@ proc newRenderTexture*(width: cint, height: cint, depthBuffer: BoolInt): RenderT
   ## \deprecated
   ## Use RenderTexture_createWithSettings instead.
 
-proc newRenderTexture*(width: cint, height: cint, settings: ContextSettings): RenderTexture {.
+proc newRenderTexture*(width: cint, height: cint, settings: (var ContextSettings){lvalue}): RenderTexture {.
   cdecl, importc: "sfRenderTexture_createWithSettings".}
+proc newRenderTexture*(width: cint, height: cint, settings: ContextSettings): RenderTexture =
   ## Construct a new render texture
   ## 
   ## *Arguments*:
@@ -1862,6 +1863,8 @@ proc newRenderTexture*(width: cint, height: cint, settings: ContextSettings): Re
   ## - ``settings``:  Settings of the render texture
   ## 
   ## *Returns:* A new RenderTexture object, or NULL if it failed
+  (var Csettings = settings)
+  newRenderTexture(width, height, Csettings)
 
 proc destroy*(renderTexture: RenderTexture) {.
   cdecl, importc: "sfRenderTexture_destroy".}
